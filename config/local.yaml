@@ -1,0 +1,4 @@
+port: 8080
+register_token: 'AAA'
+appid: 'wx2f4a8f79cc0978f6'
+appsecret: '56a7b0e8070cc7df9ab98b1d49b45313'
