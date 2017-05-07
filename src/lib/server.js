@@ -3,6 +3,8 @@ const {
 } = require('events');
 const weixinApi = require('./weixin-api');
 
+const defaultFetchAccessToken = weixinApi.fetchAccessToken;
+
 /**
  * @fires refreshed - token
  * @fires error - err
@@ -11,10 +13,19 @@ const weixinApi = require('./weixin-api');
  * @extends {EventEmitter}
  */
 class AccessToken extends EventEmitter {
-  constructor(appid, secret) {
+  /**
+   * Creates an instance of AccessToken.
+   * @param {String} appid 
+   * @param {String} secret 
+   * @param {Function} [fetchAccessToken=defaultFetchAccessToken] - api
+   * 
+   * @memberOf AccessToken
+   */
+  constructor(appid, secret, fetchAccessToken = defaultFetchAccessToken) {
     super();
     this._appid = appid;
     this._secret = secret;
+    this._fetchAccessToken = fetchAccessToken;
     this._token = null;
   }
   /**
@@ -26,7 +37,7 @@ class AccessToken extends EventEmitter {
    */
   _refreshIn(sec) {
     setTimeout(() => {
-      weixinApi.fetchAccessToken(this._appid, this._secret)
+      this._fetchAccessToken(this._appid, this._secret)
         .then(res => {
           this._token = res.access_token;
           this.emit('refreshed', this._token);
@@ -41,7 +52,7 @@ class AccessToken extends EventEmitter {
     if (this._token) {
       return this._token;
     } else {
-      const res = await weixinApi.fetchAccessToken(this._appid, this._secret);
+      const res = await this._fetchAccessToken(this._appid, this._secret);
       this._refreshIn(res.expires_in);
       this._token = res.access_token;
       return res.access_token;
